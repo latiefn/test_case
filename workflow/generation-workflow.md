@@ -1,286 +1,109 @@
 # Test Case Generation Workflow
 
-This workflow transforms a PRD into a validated XLSX file containing structured test cases designed by a Senior QA.
+## Objective
 
-## Phase 0 — Context Loading
+Transform PRD sources into a minimal, high-value, traceable XLSX test suite.
 
-1. Read `AGENTS.md`.
-2. Read `README.md`.
-3. Read all applicable rules under `rules/`.
-4. Read `schemas/test-case-schema.md`.
-5. Read `context/project-context.md`.
-6. Inspect the template: `template/Test Case template.xlsx`.
-7. Study the reference: `template/PLM-659.xlsx`.
-8. Identify the PRD files (under `prd/{TICKET}/`).
+## Phase 0 — Fast Context Load
 
-Do not start generation before context loading is complete.
+Read:
+- `AGENTS.md`
+- `README.md`
+- `schemas/test-case-schema.md`
+- core generation rules listed in `AGENTS.md`
+- relevant project context
+- current XLSX template
 
-## Phase 1 — Input Inventory
+Do not load validation/template-detail rules before they are needed.
 
-Create an internal inventory of all PRD sources:
+## Phase 1 — Source Extraction
 
-| Source | Type | Purpose | Status |
-|---|---|---|---|
-| `prd/{TICKET}/{TICKET}.xml` | XML | Requirements | Available |
-| `prd/{TICKET}/*.png` | Image | UI mockups / screenshots | Available |
-| `prd/{TICKET}/add-info.xml` | XML | Additional requirements | Available |
-| `template/Test Case template.xlsx` | XLSX | Output structure | Available |
-| `template/PLM-659.xlsx` | XLSX | Writing style reference | Available |
+1. Inventory all PRD files.
+2. Extract all requirement-bearing content.
+3. Preserve source locations.
+4. Separate explicit requirements, examples, assumptions, and ambiguous content.
+5. De-duplicate overlapping sources.
+6. Record contradictions.
 
-Adapt the inventory to the actual files provided.
+Create `work/{TICKET}/analysis.md`.
 
-## Phase 2 — Extraction
+## Phase 2 — Requirement Analysis
 
-Extract ALL requirements from ALL PRD sources.
+For each atomic requirement:
+1. identify actor/precondition/action/outcome;
+2. identify constraints and dependencies;
+3. detect design triggers;
+4. assess concrete risk;
+5. classify testability;
+6. record blockers only where behavior cannot be determined.
 
-Preserve source references.
+Classify ticket complexity:
 
-Separate:
-- explicit requirements;
-- examples;
-- explanatory content;
-- assumptions;
-- ambiguous content.
+### LOW
+Simple behavior with no interacting states, no meaningful combination space, and no significant cross-feature impact.
 
-**Senior QA focus**: Don't just extract what's written. Note what's MISSING — gaps in error handling, undefined edge cases, unspecified interactions.
+### MEDIUM
+Multiple validations, state/data lifecycle, or limited interaction/decision logic.
 
-## Phase 3 — Normalization
+### HIGH
+Large or interacting condition spaces, integration/migration impact, substantial cross-feature impact, or high documented risk.
 
-Convert raw content into normalized requirement units.
+Load `rules/11-scope-model-and-coverage-closure.md` for MEDIUM/HIGH or when closure analysis is triggered.
 
-Assign stable internal requirement IDs where official IDs are absent.
+## Phase 3 — Test Design and Generation
 
-## Phase 4 — Deep Analysis (Senior QA)
+For each requirement, generate only the test conditions activated by its triggers.
 
-This is the most critical phase. Apply the full analysis checklist from `rules/02-requirement-analysis.md`.
+Priority order:
+1. core functional behavior;
+2. distinct business-rule outcomes;
+3. explicit validation/error paths;
+4. explicit boundaries;
+5. required state/role/integration coverage;
+6. concrete regression/non-impact coverage;
+7. targeted high-risk combinations.
 
-For each requirement identify:
-- actor;
-- preconditions;
-- action;
-- input;
-- rules;
-- expected result;
-- constraints;
-- dependencies;
-- risk.
+Deduplicate during generation, not only after generating a large candidate set.
 
-### 4a. Entity-State Mapping
+Do not use a fixed number of cases per requirement.
 
-Identify all entities and their possible states:
+Update `work/{TICKET}/coverage.md` as cases are created.
 
-```text
-Entity: Standard Prescription
-  States: ON, OFF
-  Attributes: quota, coverage, limit, frequency, fee
+## Phase 4 — Coverage Closure
 
-Entity: Specialist Prescription
-  States: ON, OFF
-  Attributes: quota, coverage, limit, frequency, fee
+Check both directions:
+- requirement/condition → test case;
+- test case → requirement/condition.
 
-Context: Consultation Type
-  Values: GP, SP
-```
+For each uncovered item decide:
+- add case;
+- consolidate with existing case;
+- mark blocked;
+- mark not applicable.
 
-### 4b. Decision Table Construction
+Do not create generic cases to close a dimension that has no trigger.
 
-Build a decision table from all independent conditions:
+## Phase 5 — XLSX Mapping and Validation
 
-| # | Condition 1 | Condition 2 | Context | Expected Behavior |
-|---|---|---|---|---|
-| 1 | ON | OFF | GP | ... |
-| 2 | ON | OFF | SP | ... |
-| ... | ... | ... | ... | ... |
+Load:
+- `rules/04-test-case-rules.md`
+- `rules/07-template-rules.md`
+- `rules/08-output-xlsx-rules.md`
 
-### 4c. Cross-Feature Impact Map
+Map logical cases into the current template.
 
-Identify which existing features are affected and which are explicitly unaffected.
+Generate `output/{TICKET}.xlsx`.
 
-### 4d. Backward Compatibility Assessment
+Then run validation using `rules/09-validation-rules.md` and `workflow/validation-workflow.md`.
 
-Determine if the PRD modifies existing features and what migration/preservation guarantees exist.
+Create `work/{TICKET}/validation.md`.
 
-### 4e. Gap Identification
+## Final Output
 
-List requirements that are:
-- ambiguous;
-- incomplete;
-- contradictory;
-- missing error handling;
-- missing boundary definition.
-
-## Phase 5 — Test Design
-
-Select applicable techniques based on the analysis:
-
-| Requirement Pattern | Technique |
-|---|---|
-| Independent ON/OFF settings | Decision Tables |
-| Numeric limits | Boundary Value Analysis |
-| Parallel similar features | Data Isolation |
-| Feature enhancement | Backward Compatibility |
-| Unaffected features | Non-Impact Verification |
-| Configurable settings | Configuration Persistence |
-| Multi-step workflow | End-to-End |
-
-Do not apply techniques mechanically. Select based on the structure and risk of each requirement.
-
-## Phase 6 — Candidate Generation
-
-Generate candidate test cases following the PLM-659 patterns.
-
-Each candidate must contain:
-- summary (title in `[TC][{TICKET}] ...` format);
-- description;
-- requirement keys (PRD ticket ID);
-- precondition (precise state description);
-- steps (each with step description, step data, expected result);
-- priority;
-- reporter;
-- test category;
-- folder.
-
-### Coverage Targets
-
-Ensure candidates cover ALL dimensions:
-1. **Configuration**: Can each feature be configured independently?
-2. **State combinations**: All meaningful ON/OFF × context combinations.
-3. **Negative/ineligibility**: What happens when a feature is OFF for a given context?
-4. **Data isolation**: Do parallel features operate independently?
-5. **Data lifecycle**: Create → store → retrieve → consume → update → state-change.
-6. **Backward compatibility**: Pre-enhancement data preserved?
-7. **Non-impact**: Explicitly unaffected features verified?
-
-## Phase 7 — Deduplication
-
-Compare candidates.
-
-Remove:
-- exact duplicates;
-- semantic duplicates;
-- redundant cases covering the same condition and outcome.
-
-Keep cases that cover materially different risks.
-
-## Phase 8 — Coverage Review
-
-Build the internal requirement-to-test matrix.
-
-Verify the coverage completeness checklist from `rules/05-coverage-rules.md`.
-
-Identify:
-- covered requirements;
-- uncovered requirements;
-- ambiguous requirements;
-- unsupported scenarios.
-
-**If any coverage dimension is missing, go back to Phase 6 and add the missing test cases.**
-
-## Phase 9 — Quality Validation
-
-Apply `rules/09-validation-rules.md`.
-
-Do not trust the generator's own claim that its output is correct.
-
-## Phase 10 — Template Mapping
-
-Map the logical test cases into the XLSX template:
-
-1. Create sheet `Tests`.
-2. Write the 20-column header row.
-3. For each test case:
-   a. Write Step 1 row with all metadata columns + step data.
-   b. Write Step 2+ rows with only Step Description, Step Data, Expected Result.
-4. Leave optional columns empty when not applicable.
-
-## Phase 11 — XLSX Generation
-
-Generate the XLSX file using `openpyxl`:
-
-1. Create workbook with sheet `Tests`.
-2. Write header row with all 20 columns.
-3. Write test case rows following the multi-step convention.
-4. Apply formatting (Arial 10pt, text wrapping, column widths).
-5. Save to `output/{TICKET}.xlsx`.
-
-## Phase 12 — XLSX Validation
-
-Validate the generated XLSX:
-- Open the file and verify it is not corrupt.
-- Verify header matches template.
-- Verify multi-step grouping is correct.
-- Verify no misaligned or truncated rows.
-- Verify text cells are not converted to numbers/dates.
-
-## Phase 13 — Final Output
-
-Return the generated XLSX file.
-
-Provide a concise summary of:
-- total test cases;
-- total test steps;
-- coverage dimensions addressed;
-- coverage gaps (if any);
-- ambiguities (if any);
-- assumptions (if any);
-- validation issues (if any).
-
-Never put analysis into the XLSX itself.
-
-## Mandatory Workflow Gates
-
-The following gates apply to the phases above and take precedence over generic checklist wording.
-
-### Gate A — Source and Requirement Completeness (after Phase 3)
-
-Do not start test design until:
-- every source is inventoried as processed, duplicate, superseded, unreadable, or conflicting;
-- every atomic requirement, acceptance criterion, business-rule row, explicit exception, and non-impact statement has a stable ID and source evidence;
-- each item is classified `EXPLICIT`, `DERIVED`, `ASSUMPTION`, or `UNKNOWN`;
-- conflicts and unreadable content are recorded.
-
-### Gate B — Scope and Test-Condition Readiness (after Phase 5)
-
-Create the scope model, applicability matrix, test-condition inventory, risk assessment, and required decision/state models from `rules/11-scope-model-and-coverage-closure.md`.
-
-For each dimension, record `APPLICABLE`, `NOT APPLICABLE`, or `BLOCKED` with rationale. For every condition, identify its requirement IDs, technique, risk, and expected-result oracle. Do not proceed with a condition whose oracle is unknown.
-
-### Gate C — Combination Closure (before Phase 6)
-
-Confirm that:
-- every feasible, outcome-distinct decision-table row is selected;
-- every documented state and valid transition is selected;
-- impossible combinations cite source evidence;
-- reduced combinatorial suites state the technique and do not claim exhaustive coverage;
-- explicit compatibility, migration, non-impact, negative, and integration-error promises have conditions.
-
-### Gate D — Candidate Traceability and Deduplication (Phases 6–8)
-
-Each candidate Description must include `Coverage: <REQ IDs> / <COND IDs>`. Build the bidirectional coverage matrix and semantic signature defined in Rule 11.
-
-A candidate may be consolidated only if the retained test clearly proves all mapped outcomes under compatible preconditions. Preserve all mapped condition IDs. Remove orphan cases that have no authoritative basis.
-
-Do not map cases to XLSX while any requirement/condition has a blank disposition.
-
-### Gate E — Adversarial Validation (Phases 9–12)
-
-Review the suite independently from the generator's candidate list. Re-read source evidence and actively search for:
-- missed requirements, table rows, footnotes, screenshot states, and exceptions;
-- unsupported expected results;
-- untested state/decision rows;
-- silent `NOT APPLICABLE` claims;
-- contradictory cases and semantic duplicates;
-- missing continuation-row rules or stale reference columns.
-
-Apply the validation workflow and closure decision. Fix failed cases or coverage gaps before writing the final workbook.
-
-### Final Reporting Requirement
-
-Always report, even when the user requests only XLSX:
-- case and step counts;
-- requirements/conditions covered;
-- reduction methods and exclusions;
-- unresolved ambiguities, blockers, conflicts, and assumptions;
-- closure result: `PASS`, `PASS WITH WARNINGS`, or `FAIL`.
-
-Do not describe a suite with blocked critical scope as complete.
+Return the XLSX and a concise summary of:
+- test-case count;
+- blocked requirements;
+- coverage reduction used, if any;
+- warnings/validation issues.
+
+Do not place analysis artifacts inside the XLSX.
