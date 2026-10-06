@@ -1,0 +1,6 @@
+enable_aggregator_api kalo false bakal ngecek mmv on atau off, dan kalo mmv off bakal langsung member invalid
+enable_aggregator_api kalo isinya cuma admedika, bakal langsung hit api admedika dan kalo ga ada bakal not found
+enable_aggregator_api kalo ada 2 bakal sesuai prefix
+enable_aggregator_api kalo ada 2 dan prefix sama bakal berdasarkan urutan
+
+scope aggregator : Admedika, Meditap, FitAja, Medlinx
