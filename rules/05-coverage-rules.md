@@ -42,13 +42,9 @@ Use the smallest depth that closes the triggered dimension:
 
 ## 5. Consolidation
 
-Consolidate cases when they have the same:
-- primary behavior;
-- precondition/state;
-- observable outcome;
-- failure mode.
+Consolidate (`CONSOLIDATED`) only when the conditions have the same primary behavior, precondition/state, observable outcome, and failure mode — for example data variants of one outcome, or effects of one expensive trigger.
 
-Do not consolidate when diagnosis becomes ambiguous or materially different risks are hidden.
+Do not consolidate independent conditions, alternative triggers with their own failure mode, or conditions with different outcomes. Apply `rules/04-test-case-rules.md` §7.
 
 ## 6. Bidirectional Mapping
 

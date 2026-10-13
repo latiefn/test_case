@@ -23,7 +23,7 @@ PRD files are stored under `prd/{TICKET}/`.
 Tickets can be read directly from Jira via the Atlassian MCP when a local PRD is missing. Resolve the Atlassian cloudId once per session and reuse it. After reading an issue, save the extracted requirement to `prd/{TICKET}/{TICKET}.md` and treat it as a PRD source for later reuse (avoids repeat Jira calls). Use Jira read to fetch the ticket, confirm metadata (Sprint → Folder, reporter), and discover linked designs/attachments. Never invent fields Jira did not return.
 
 ### Figma Content Cache
-When a PRD references a Figma design, fetch it from the MCP only once and cache the extracted content to `prd/{TICKET}/figma-content.md`. Reuse that file on later runs instead of calling Figma again (MCP access is rate-limited — a View/Collab seat allows only ~20 calls/month). The cache must record file name, file key, node id, URL, "Fetched at" date, and the referencing ticket, and is treated as part of the PRD source. Re-fetch only to refresh a changed design, obtain missing detail, or download a PNG/SVG screenshot.
+When a PRD references a Figma design, fetch it from the MCP only once and cache the extracted content to `prd/{TICKET}/figma-content.md`. Reuse that file on later runs instead of calling Figma again (MCP access is rate-limited — a View/Collab seat allows only ~20 calls/month). The cache must capture three layers per screen so it supports UI-shape test cases, not only text: (1) message copy, (2) UI elements (fields, buttons/CTAs, icons, states/variants), and (3) flow hints (steppers, navigation arrows, connectors, cross-flow links — marked as design indications, not guaranteed test steps). It must also record file name, file key, node id, URL, "Fetched at" date, and the referencing ticket, and is treated as part of the PRD source. The cached Markdown is enough for functional UI test cases; only pure visual checks (color/pixel/layout) need a PNG/SVG. Re-fetch only to refresh a changed design, obtain missing detail, or download a screenshot. See `rules/01-input-processing.md`.
 
 Output template:
 - `template/Test Case template.xlsx` (20-column Jira import format)
@@ -88,6 +88,9 @@ PRD tickets follow `PLM-{number}`.
 
 ### Test Case Summary Format
 `[TC][{TICKET}] {Descriptive title}`
+
+### Test Case Language
+Test case content is written in **English only** (Summary, Description, Precondition, Steps, Expected Result), regardless of chat language or PRD source language. Preserve a source-defined literal string (exact UI message/label/status) verbatim in quotes when it must be asserted, keeping the surrounding wording in English. See `rules/04-test-case-rules.md` §12.
 
 ### Requirement Keys
 Set to the official PRD/Jira ticket ID. Put internal requirement and condition IDs in Description.

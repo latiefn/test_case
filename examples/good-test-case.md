@@ -40,10 +40,10 @@ Do not infer a fixed number of combinations from this example.
 
 ## Writing Rules
 
-- One primary behavior per case.
-- Multi-step flows are allowed when steps form one coherent scenario.
+- One observable outcome and one reason to fail per case (`rules/04-test-case-rules.md` §7).
+- Multi-step flows are allowed when steps form one dependent chain toward that outcome.
 - Expected results must be observable.
 - Preserve exact source wording when the requirement specifies exact text/value/status.
 - Use representative placeholders when exact data is not defined.
 - Do not invent error messages, limits, or roles.
-- Prefer fewer strong cases over many shallow variants.
+- Avoid shallow duplicate variants, but do not merge independent conditions to reduce the count.

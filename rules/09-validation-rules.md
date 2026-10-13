@@ -9,6 +9,7 @@ Check:
 - unsupported/invented behavior;
 - executable steps;
 - observable expected results;
+- English-only test case text (except source-defined literal strings quoted verbatim);
 - duplicate cases;
 - priority validity;
 - required template fields;
@@ -44,6 +45,10 @@ Detect:
 - same behavior/outcome with equivalent conditions.
 
 Keep separate only when risk, state, outcome, or failure diagnosis materially differs.
+
+## 4a. Granularity Check
+
+Flag any case that verifies more than one independent outcome — for example a case whose steps test cancel, save, and sync as separate conditions. Apply the independence test from `rules/04-test-case-rules.md` §7: if a later step remains meaningfully testable after an earlier step fails, the case must be split.
 
 ## 5. Requirement Coverage
 
