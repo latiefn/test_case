@@ -10,7 +10,7 @@ Do not invent product behavior, business rules, limits, roles, permissions, erro
 
 Use this priority:
 1. Current user instruction
-2. Current PRD / requirement sources
+2. Current PRD / requirement sources (files under `prd/{TICKET}/`, or the Jira ticket read via the Atlassian MCP and cached to `prd/{TICKET}/{TICKET}.md`)
 3. `template/Test Case template.xlsx`
 4. Explicit project rules
 5. Project context
@@ -37,6 +37,7 @@ Do not read every Markdown file in full at startup.
 - `rules/10-ambiguity-and-assumption.md`
 - relevant `context/` files
 - current XLSX template
+- `prd/{TICKET}/figma-content.md` when the ticket references a Figma design (use this cache instead of calling the Figma MCP again; re-fetch only to refresh a changed design)
 
 ### Load only when needed
 - `rules/04-test-case-rules.md` — when writing test-case text

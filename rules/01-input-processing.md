@@ -10,6 +10,16 @@ For large documents, extract text/tables programmatically when possible and insp
 
 ## 2. Source Types
 
+### Jira (via MCP) — read ticket directly, cache to prd/{TICKET}/
+A ticket's requirement can be read directly from Jira through the Atlassian MCP, even when no file exists under `prd/{TICKET}/` yet.
+
+Procedure:
+1. Resolve the Atlassian cloudId once per session (cache it), then read the issue (summary, description, acceptance criteria, status, sprint, reporter/assignee, attachments list, issue links, subtasks).
+2. Persist the extracted requirement to `prd/{TICKET}/{TICKET}.md` so later runs do not need another Jira call. Treat this file as a PRD source.
+3. Record the ticket key, type, project, sprint, reporter, and fetch context in the saved file.
+
+Use Jira read for: fetching the ticket when the user names a key but no local PRD exists; confirming metadata (sprint → Folder, reporter); and discovering linked designs/attachments. Do not invent fields Jira did not return. If the ticket references a Figma design, follow the Figma caching rule below. Prefer reading the issue once and reusing the saved `.md`; re-read only to refresh a changed ticket.
+
 ### PDF
 Extract:
 - headings;
@@ -38,6 +48,16 @@ Extract relevant elements, attributes, values, hierarchy, enums, relationships, 
 
 ### Markdown / Plain Text
 Extract requirement statements, acceptance criteria, rules, constraints, states, workflows, examples, and explicit expected behavior.
+
+### Figma (via MCP) — fetch once, cache to Markdown
+Figma MCP access is rate-limited (e.g., a View/Collab seat allows only ~20 tool calls/month). To conserve quota:
+1. Fetch a Figma file/node from the MCP **only once**.
+2. Immediately persist the extracted content (message copy, labels, states, structure) to `prd/{TICKET}/figma-content.md`.
+3. On later runs, read `prd/{TICKET}/figma-content.md` instead of calling Figma again.
+
+The cache file MUST record: file name, file key, node id, URL, "Fetched at" date, and the referencing ticket. Treat it as part of the PRD source (same priority as other `prd/{TICKET}/` content).
+
+Refresh (one new fetch) only when: the design changed, the cache is missing required detail, or a PNG/SVG screenshot is explicitly needed. Prefer fetching specific node ids over whole files, and batch needs into a single call. A stale cache (design changed) must be re-fetched and the "Fetched at" date updated.
 
 ## 3. Multiple Sources
 

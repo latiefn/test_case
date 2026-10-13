@@ -1,3 +1,4 @@
-output/
-prd/
-template
+output/*
+prd/*
+template/*
+work/*

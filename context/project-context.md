@@ -19,6 +19,12 @@ PRD inputs may include:
 
 PRD files are stored under `prd/{TICKET}/`.
 
+### Reading Tickets from Jira (MCP)
+Tickets can be read directly from Jira via the Atlassian MCP when a local PRD is missing. Resolve the Atlassian cloudId once per session and reuse it. After reading an issue, save the extracted requirement to `prd/{TICKET}/{TICKET}.md` and treat it as a PRD source for later reuse (avoids repeat Jira calls). Use Jira read to fetch the ticket, confirm metadata (Sprint → Folder, reporter), and discover linked designs/attachments. Never invent fields Jira did not return.
+
+### Figma Content Cache
+When a PRD references a Figma design, fetch it from the MCP only once and cache the extracted content to `prd/{TICKET}/figma-content.md`. Reuse that file on later runs instead of calling Figma again (MCP access is rate-limited — a View/Collab seat allows only ~20 calls/month). The cache must record file name, file key, node id, URL, "Fetched at" date, and the referencing ticket, and is treated as part of the PRD source. Re-fetch only to refresh a changed design, obtain missing detail, or download a PNG/SVG screenshot.
+
 Output template:
 - `template/Test Case template.xlsx` (20-column Jira import format)
 
