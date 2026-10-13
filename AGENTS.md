@@ -54,7 +54,9 @@ Generate the smallest test suite that closes the documented, testable scope and 
 
 Test count is not a target.
 
-Prefer one well-designed test case that proves several compatible conditions over multiple fragmented cases, provided diagnosis remains clear.
+"Smallest" means no duplicate, redundant, or unsupported cases. It does not mean merging independent conditions into one case.
+
+Each test case verifies one observable outcome and fails for one reason. Split when the outcome, alternative trigger, actor/precondition, or risk differs, or when a later condition stays testable after an earlier step fails. Keep steps together only for one dependent chain, data variants of the same outcome, or one expensive setup with effects of a single trigger. Full rule: `rules/04-test-case-rules.md` §7.
 
 ## Adaptive Test Design
 

@@ -36,13 +36,9 @@ Generate enough cases to cover meaningful behavior and material risk.
 
 Do not use fixed case-count targets.
 
-Consolidate cases when they share the same:
-- behavior;
-- observable outcome;
-- failure mode;
-- data/state condition.
+Remove cases that duplicate another case's behavior, outcome, failure mode, and data/state condition.
 
-Keep cases separate when diagnosis or expected outcome materially differs.
+Do not merge independent conditions into one case to reduce the count. One case = one observable outcome, one reason to fail. See `rules/04-test-case-rules.md` §7.
 
 ## 5. Observable Oracles
 
@@ -52,9 +48,9 @@ Do not write vague outcomes such as `works correctly` or `system behaves properl
 
 ## 6. Atomic but Cohesive
 
-A test case has one primary behavior or scenario.
+A test case has one observable outcome and one reason to fail.
 
-A coherent multi-step flow is valid when all steps contribute to the same verification, such as configure → save → reopen → verify persistence.
+A multi-step flow is valid when every step is part of one dependent chain toward that outcome, such as configure → save → reopen → verify persistence. Independent conditions belong in separate cases.
 
 ## 7. Independence
 

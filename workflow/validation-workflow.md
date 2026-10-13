@@ -15,13 +15,17 @@ Load the full generation context only when a semantic dispute cannot be resolved
 
 ## Step 2 — Structural Validation
 
-Check:
-- workbook opens;
-- sheet name is `Tests`;
-- current header/order match;
-- required fields are populated;
-- multi-step row convention is correct;
-- text values are preserved.
+Re-open the saved `output/{TICKET}.xlsx` and confirm:
+- the file opens successfully and the ZIP is intact;
+- the sheet name is `Tests`;
+- the header row matches the current 20-column template exactly, including fill and wrap;
+- column widths carried over from the template;
+- no leftover sample/instruction data from the template remains;
+- required fields are populated (Requirement Keys, Priority, Reporter, Test Category, Precondition, Folder on every test case);
+- the multi-step row convention is correct — metadata appears only on each test case's first row; continuation rows carry only Step Description, Step Data, and Expected Result;
+- every step row has both a Step Description and an Expected Result;
+- the test-case count and per-test-case step counts match the approved set;
+- text values are preserved (IDs/codes kept as text).
 
 ## Step 3 — Semantic Validation
 
@@ -77,3 +81,9 @@ Also check whether expected results conflict with the authoritative requirements
 Repair only affected cases where possible. Do not regenerate the entire suite unless the defect is systemic.
 
 Write final result to `work/{TICKET}/validation.md`.
+
+## Step 9 — Report and Cleanup
+
+Report a pass/fail summary. If any value in the saved file differs from what was approved, flag it explicitly rather than glossing over it.
+
+Clean up temporary throwaway scripts when finished (keep the `work/{TICKET}/generate.py` artifact), and give the user the **exact absolute file path** of the generated workbook.

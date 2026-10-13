@@ -83,6 +83,17 @@ For each uncovered item decide:
 
 Do not create generic cases to close a dimension that has no trigger.
 
+## Phase 4.5 — Pre-Build Approval Gate
+
+Before writing any XLSX file:
+
+1. Present the full set of proposed test cases as a table or structured text for review.
+2. Call out scenarios deliberately skipped because no source supports them, and any local blockers.
+3. Confirm with the user any required metadata that cannot be derived from Jira/PRD — in particular **Folder sprint path**, **Reporter**, **Assignee**, and **Epic Key**. Folder paths follow `{Year}/{Year} Sprint {N}/{TICKET}` and the sprint is rarely derivable from the ticket; ask rather than invent.
+4. Wait for approval, then build the workbook.
+
+Skip the wait only when the user has already explicitly authorized direct generation.
+
 ## Phase 5 — XLSX Mapping and Validation
 
 Load:
